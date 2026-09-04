@@ -14,6 +14,7 @@ from iso_42001_controls import (
 )
 from ai_system_classifier import AISystemClassifier, AISystemType
 from risk_scoring import RiskScoringEngine, RiskScore
+from report_generator import ReportGenerator
 
 
 class AIRiskAssessment:
@@ -22,6 +23,7 @@ class AIRiskAssessment:
     def __init__(self):
         self.classifier = AISystemClassifier()
         self.risk_engine = RiskScoringEngine()
+        self.report_generator = ReportGenerator()
         self.assessment_results = {}
     
     def conduct_assessment(
@@ -250,6 +252,16 @@ KEY RISK FACTORS
         with open(filename, 'w') as f:
             json.dump(assessment, f, indent=2, default=str)
     
+    def generate_excel_report(self, assessment: Dict, filename: str) -> None:
+        """
+        Generate Excel report from assessment results
+        
+        Args:
+            assessment: Assessment results dictionary
+            filename: Output filename
+        """
+        self.report_generator.generate_report(assessment, filename)
+    
     def get_assessment_statistics(self, assessments: List[Dict]) -> Dict:
         """
         Calculate statistics across multiple assessments
@@ -289,45 +301,53 @@ KEY RISK FACTORS
 
 # Example usage and testing
 if __name__ == "__main__":
-    assessor = AIRiskAssessment()
-    
-    # Test single assessment
-    test_system = {
-        "name": "Customer Service Chatbot",
-        "description": "A generative AI chatbot that handles customer service inquiries and provides product recommendations",
-        "features": {
-            "personal_data": True,
-            "high_user_impact": True,
-            "regulated_industry": False,
-            "fully_autonomous": False,
-            "human_in_loop": True
-        },
-        "implemented_controls": [
-            "AI_GOV_001",  # AI Governance Policy
-            "AI_ORG_002",  # AI Roles and Responsibilities
-            "AI_PLAN_001",  # AI Risk Assessment
-            "AI_OPS_002",  # AI Monitoring
-            "AI_RISK_003"   # AI Risk Treatment Planning
-        ],
-        "metadata": {
-            "assessor": "Terence Webster",
-            "department": "IT Security"
+    try:
+        assessor = AIRiskAssessment()
+        
+        # Test single assessment
+        test_system = {
+            "name": "Customer Service Chatbot",
+            "description": "A generative AI chatbot that handles customer service inquiries and provides product recommendations",
+            "features": {
+                "personal_data": True,
+                "high_user_impact": True,
+                "regulated_industry": False,
+                "fully_autonomous": False,
+                "human_in_loop": True
+            },
+            "implemented_controls": [
+                "AI_GOV_001",  # AI Governance Policy
+                "AI_ORG_002",  # AI Roles and Responsibilities
+                "AI_PLAN_001",  # AI Risk Assessment
+                "AI_OPS_002",  # AI Monitoring
+                "AI_RISK_003"   # AI Risk Treatment Planning
+            ],
+            "metadata": {
+                "assessor": "Terence Webster",
+                "department": "IT Security"
+            }
         }
-    }
-    
-    assessment = assessor.conduct_assessment(
-        system_name=test_system["name"],
-        system_description=test_system["description"],
-        system_features=test_system["features"],
-        implemented_controls=test_system["implemented_controls"],
-        assessment_metadata=test_system["metadata"]
-    )
-    
-    print("=" * 60)
-    print("AI RISK ASSESSMENT RESULT")
-    print("=" * 60)
-    print(assessor.generate_assessment_summary(assessment))
-    
-    # Export to JSON
-    assessor.export_to_json(assessment, "assessment_result.json")
-    print("\nAssessment exported to assessment_result.json")
+        
+        assessment = assessor.conduct_assessment(
+            system_name=test_system["name"],
+            system_description=test_system["description"],
+            system_features=test_system["features"],
+            implemented_controls=test_system["implemented_controls"],
+            assessment_metadata=test_system["metadata"]
+        )
+        
+        print("=" * 60)
+        print("AI RISK ASSESSMENT RESULT")
+        print("=" * 60)
+        print(assessor.generate_assessment_summary(assessment))
+        
+        # Export to JSON
+        assessor.export_to_json(assessment, "assessment_result.json")
+        print("\nAssessment exported to assessment_result.json")
+        
+        # Generate Excel report
+        assessor.generate_excel_report(assessment, "ai_risk_assessment_report.xlsx")
+        print("Excel report generated: ai_risk_assessment_report.xlsx")
+    except ImportError as e:
+        print(f"Missing dependency: {e}")
+        print("Install with: pip install openpyxl")
